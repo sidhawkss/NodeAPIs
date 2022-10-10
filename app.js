@@ -24,7 +24,7 @@ function validateCourse(course){
 
 // Principal route
 app.get('/api/courses', (req,res) => {
-    
+
     res.send(courses);
 
 })
@@ -86,6 +86,19 @@ app.put('/api/courses/:id', (req,res) =>{
     res.send(course);
 })
 
+
+app.delete('/api/courses/:id', (req,res) =>{
+    
+    const course  = courses.find(c => c.id === parseInt(req.params.id))
+    if(!course){
+        res.status(404).send("The course was not found!")
+    }else{
+        const index = courses.indexOf(course);
+        courses.splice(index, 1) // delete
+        res.send(course);
+    }
+
+})
 
 
 app.listen(5000, () =>{
