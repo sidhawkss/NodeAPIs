@@ -1,0 +1,6 @@
+{
+	"name": "Express production config",
+	"production":{
+		"host":"production-server"
+	}
+}

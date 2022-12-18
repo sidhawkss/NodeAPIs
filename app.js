@@ -1,26 +1,75 @@
+const config = require('config');
 const Joi = require('joi');
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
+const pug = require('pug');
 
-app.use(express.json());
+// Template engine configuration
+app.set('view engine', 'pug');
+app.set('views','./views')
 
+// Config: Configuration
+console.log('Application Name: '+config.get('name'));
+console.log('Server: '+config.get('principal.host'));
+
+
+// Set morgan by environment
+console.log(`ENV running: ${process.env.NODE_ENV}`); 
+
+if(app.get('env') == "development"){	
+	app.use(morgan('tiny'));
+	console.log('Morgan middlware enabled[!]');
+}
+
+
+// Course dict
 const courses = [
     {id:1, name: 'course1'},
     {id:2, name: 'course2'},
     {id:3, name: 'course3'}
 ]
 
+
 // Function to validate course.
 function validateCourse(course){
 
     const schema = Joi.object({
-        name: Joi.string().min(3).required()
+		name: Joi.string().min(3).required(),
     });
 
     const result = schema.validate(course);
 
-    return result;
+	return result;
 }
+
+function inputValidation(query){
+
+    const schema = Joi.object({
+    	message: Joi.string().min(5)
+    });
+
+    const result = schema.validate(query);
+
+    return result;
+
+}
+
+
+// Main route
+app.get('/',(req,res) => {
+
+	// Validation
+	let { error } = inputValidation(req.query);
+
+	if(!error){
+		res.status(404).send("Error occurred!");
+	}else{
+		res.render('index', {message:req.query.message});
+	}
+
+});
+
 
 // Principal route
 app.get('/api/courses', (req,res) => {
@@ -48,11 +97,11 @@ app.post('/api/courses', (req,res) => {
     // Validation of the user input
     const schema = Joi.object({
         name: Joi.string().min(3).required()
-    })
+    });
 
-    const { error } = schema.validate(req.body);
+	const { error } = schema.validate(req.body);
 
-    const course = {
+	const course = {
         id: courses.length + 1,
         name: req.body.name
     };
@@ -67,9 +116,10 @@ app.post('/api/courses', (req,res) => {
 
 ;})
 
+
+// Route to update courses
 app.put('/api/courses/:id', (req,res) =>{
     
-    // Update and course
     const course  = courses.find(c => c.id === parseInt(req.params.id));
 
     if(!course){
@@ -77,6 +127,7 @@ app.put('/api/courses/:id', (req,res) =>{
     };
 
     const {error} = validateCourse(req.body);
+
     if(error){
         res.status(404).send("Error, input a valid string");
         return;
@@ -87,6 +138,7 @@ app.put('/api/courses/:id', (req,res) =>{
 })
 
 
+// Route to delete course
 app.delete('/api/courses/:id', (req,res) =>{
     
     const course  = courses.find(c => c.id === parseInt(req.params.id))

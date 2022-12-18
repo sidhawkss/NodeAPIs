@@ -1,0 +1,6 @@
+{
+	"name": "Express default config",
+	"principal":{
+		"host":"default-server"
+	}
+}

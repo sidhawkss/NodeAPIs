@@ -1,0 +1,6 @@
+{
+	"name": "Express development config",
+	"principal":{
+		"host":"development-server"
+	}
+}
